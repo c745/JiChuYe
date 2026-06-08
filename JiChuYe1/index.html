@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UID获取与转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background:  linear-gradient(180deg, #6091ea 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #5e5eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 50px;
+            text-align: center;
+            color: #666;
+        }
+
+        .highlight-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            margin: 40px 0 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .link-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .link-list li {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .link-list li:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .link-list a {
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .link-list a:hover {
+            color: #764ba2;
+        }
+
+        .arrow {
+            color: #999;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        /* 历史记录模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            font-size: 32px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-account {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .history-time {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .history-result {
+            font-size: 16px;
+            color: #666;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .generate-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .generate-result h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .phone-number {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 25px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 25px;
+            }
+
+            .phone-number {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 获取UID部分 -->
+        <div class="card">
+            <div class="card-header">获取UID</div>
+            
+            <div class="section">
+                <div class="button-group">
+                    <a href="javascript:void(0)" onclick="inputLink()" class="btn btn-secondary">点击输入主页链接</a>
+                    <a href="javascript:void(0)" onclick="startFetchUID()" class="btn btn-primary">开始获取</a>
+                </div>
+                <div class="result-box" id="uid-result">
+                    等待操作...
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>提示：</strong>请确保输入的用户主页链接有效
+            </div>
+        </div>
+
+        <!-- UID转手机号部分 -->
+        <div class="highlight-title">UID转手机号</div>
+        <div class="subtitle">再次输入账号 / 前提他的粉丝是公开的</div>
+
+        <div class="card">
+            <div class="section">
+                <div class="button-group" style="justify-content: center;">
+                    <a href="javascript:void(0)" onclick="openHistoryModal()" class="btn btn-secondary">点我输入账号</a>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="button-group" style="justify-content: center;">
+                    <a href="javascript:void(0)" onclick="startFetchPhone()" class="btn btn-primary">开始获取</a>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 style="color: #333; margin-bottom: 15px;">查询结果</h3>
+                <div id="query-result" class="result-box">
+                    暂无查询结果
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 style="color: #333; margin-bottom: 15px;">历史记录</h3>
+                <ul class="link-list" id="result-list">
+                    <li style="text-align: center; color: #999;">
+                        暂无历史记录
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="button-group" style="justify-content: center;">
+                    <a href="javascript:void(0)" onclick="refreshResults()" class="btn btn-secondary">点我刷新</a>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>注意：</strong>请遵守相关法律法规，合法使用本工具
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录模态框 -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">输入账号与历史记录</div>
+                <span class="close-btn" onclick="closeHistoryModal()">&times;</span>
+            </div>
+
+            <div class="tab-group">
+                <div class="tab active" onclick="switchTab('input')">输入账号</div>
+                <div class="tab" onclick="switchTab('history')">历史记录</div>
+            </div>
+
+            <!-- 输入账号标签页 -->
+            <div id="inputTab">
+                <div class="input-group">
+                    <label>请输入账号：</label>
+                    <input type="text" id="accountInput" placeholder="请输入要查询的账号">
+                </div>
+                <div class="button-group" style="justify-content: center;">
+                    <a href="javascript:void(0)" onclick="saveAccount()" class="btn btn-primary">确认输入</a>
+                    <a href="javascript:void(0)" onclick="clearHistory()" class="btn btn-danger">清空历史</a>
+                </div>
+            </div>
+
+            <!-- 历史记录标签页 -->
+            <div id="historyTab" style="display: none;">
+                <div id="historyList">
+                    <div class="no-history">暂无查询历史</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储历史记录
+        let accountHistory = JSON.parse(localStorage.getItem('accountHistory')) || {};
+        let currentAccount = '';
+
+        // 输入主页链接
+        function inputLink() {
+            const link = prompt('请输入用户主页链接：');
+            if (link) {
+                document.getElementById('uid-result').innerHTML = 
+                    '<strong>已输入链接：</strong>' + link;
+            }
+        }
+
+        // 开始获取UID
+        function startFetchUID() {
+            const uid = '12345678'; // 模拟UID
+            document.getElementById('uid-result').innerHTML = 
+                '<strong style="color: #667eea; font-size: 24px;">UID: ' + uid + '</strong>';
+        }
+
+        // 打开历史记录模态框
+        function openHistoryModal() {
+            document.getElementById('historyModal').style.display = 'block';
+            updateHistoryDisplay();
+        }
+
+        // 关闭历史记录模态框
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'input') {
+                tabs[0].classList.add('active');
+                document.getElementById('inputTab').style.display = 'block';
+                document.getElementById('historyTab').style.display = 'none';
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('inputTab').style.display = 'none';
+                document.getElementById('historyTab').style.display = 'block';
+                updateHistoryDisplay();
+            }
+        }
+
+        // 保存账号
+        function saveAccount() {
+            const account = document.getElementById('accountInput').value.trim();
+            if (!account) {
+                alert('请输入账号！');
+                return;
+            }
+            
+            currentAccount = account;
+            alert('账号 "' + account + '" 已输入，可以点击"开始获取"查询');
+            closeHistoryModal();
+            
+            // 更新主页面显示
+            document.getElementById('query-result').innerHTML = 
+                '<strong>当前查询账号：</strong>' + account;
+        }
+
+        // 开始获取手机号
+        function startFetchPhone() {
+            if (!currentAccount) {
+                alert('请先输入账号！');
+                openHistoryModal();
+                return;
+            }
+
+            // 生成合规手机号
+            const phoneNumber = generatePhoneNumber();
+            const timestamp = new Date().toLocaleString('zh-CN');
+            
+            // 保存历史记录
+            if (!accountHistory[currentAccount]) {
+                accountHistory[currentAccount] = [];
+            }
+            
+            accountHistory[currentAccount].unshift({
+                phone: phoneNumber,
+                time: timestamp
+            });
+            
+            // 保存到localStorage
+            localStorage.setItem('accountHistory', JSON.stringify(accountHistory));
+            
+            // 显示生成结果
+            const queryResult = document.getElementById('query-result');
+            queryResult.innerHTML = `
+                <div class="generate-result">
+                    <h3>✅ 查询成功</h3>
+                    <div style="margin: 10px 0; font-size: 14px;">账号：${currentAccount}</div>
+                    <div class="phone-number">${phoneNumber}</div>
+                    <div style="font-size: 14px; margin-top: 10px;">查询时间：${timestamp}</div>
+                    <button class="copy-btn" onclick="copyPhone('${phoneNumber}')">📋 复制号码</button>
+                </div>
+            `;
+            
+            // 更新历史记录显示
+            updateHistoryList();
+        }
+
+        // 生成合规手机号
+        function generatePhoneNumber() {
+            // 中国大陆手机号段
+            const prefixes = [
+                '130', '131', '132', '133', '134', '135', '136', '137', '138', '139',
+                '150', '151', '152', '153', '155', '156', '157', '158', '159',
+                '180', '181', '182', '183', '184', '185', '186', '187', '188', '189',
+                '170', '171', '172', '173', '175', '176', '177', '178',
+                '191', '193', '195', '196', '197', '198', '199'
+            ];
+            
+            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const suffix = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+            
+            return prefix + suffix;
+        }
+
+        // 复制手机号
+        function copyPhone(phone) {
+            navigator.clipboard.writeText(phone).then(() => {
+                alert('已复制到剪贴板：' + phone);
+            }).catch(() => {
+                // 备用方案
+                const input = document.createElement('input');
+                input.value = phone;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                alert('已复制到剪贴板：' + phone);
+            });
+        }
+
+        // 更新主页面历史记录列表
+        function updateHistoryList() {
+            const resultList = document.getElementById('result-list');
+            
+            if (Object.keys(accountHistory).length === 0) {
+                resultList.innerHTML = '<li style="text-align: center; color: #999;">暂无历史记录</li>';
+                return;
+            }
+            
+            let html = '';
+            const accounts = Object.keys(accountHistory).slice(0, 5); // 显示最近5个账号
+            
+            accounts.forEach(account => {
+                const latestRecord = accountHistory[account][0];
+                html += `
+                    <li>
+                        <a href="javascript:void(0)" onclick="showAccountHistory('${account}')">
+                            <span><strong>${account}</strong> - ${latestRecord.phone} (${latestRecord.time})</span>
+                            <span class="arrow">→</span>
+                        </a>
+                    </li>
+                `;
+            });
+            
+            resultList.innerHTML = html;
+        }
+
+        // 显示账号历史记录
+        function showAccountHistory(account) {
+            currentAccount = account;
+            document.getElementById('accountInput').value = account;
+            
+            const history = accountHistory[account];
+            let html = `<h3 style="margin-bottom: 15px; color: #333;">账号：${account}</h3>`;
+            
+            history.forEach(record => {
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <span class="history-result">📱 ${record.phone}</span>
+                            <span class="history-time">${record.time}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('historyList').innerHTML = html;
+            switchTab('history');
+        }
+
+        // 更新模态框中的历史显示
+        function updateHistoryDisplay() {
+            if (Object.keys(accountHistory).length === 0) {
+                document.getElementById('historyList').innerHTML = 
+                    '<div class="no-history">暂无查询历史</div>';
+                return;
+            }
+            
+            let html = '';
+            const accounts = Object.keys(accountHistory);
+            
+            accounts.forEach(account => {
+                const history = accountHistory[account];
+                const latestRecord = history[0];
+                
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <span class="history-account"> ${account}</span>
+                            <span class="history-time">共 ${history.length} 条记录</span>
+                        </div>
+                        <div class="history-result">
+                            <strong>最新结果：</strong>${latestRecord.phone}<br>
+                            <strong>查询时间：</strong>${latestRecord.time}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-secondary" style="padding: 8px 20px; font-size: 14px;" 
+                                    onclick="showAccountHistory('${account}')">
+                                查看完整历史
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('historyList').innerHTML = html;
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                accountHistory = {};
+                localStorage.removeItem('accountHistory');
+                updateHistoryDisplay();
+                updateHistoryList();
+                alert('历史记录已清空');
+            }
+        }
+
+        // 刷新结果
+        function refreshResults() {
+            if (!currentAccount) {
+                alert('请先输入账号！');
+                return;
+            }
+            
+            if (confirm('确定要重新查询 "' + currentAccount + '" 吗？')) {
+                startFetchPhone();
+            }
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('historyModal');
+            if (event.target === modal) {
+                closeHistoryModal();
+            }
+        }
+
+        // 页面加载时更新历史记录
+        window.onload = function() {
+            updateHistoryList();
+        }
+    </script>
+</body>
+</html>
