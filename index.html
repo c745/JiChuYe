@@ -781,8 +781,8 @@
 
         // 生成随机等待时间（10分钟-60分钟，即600-3600秒）
         function generateRandomWaitTime() {
-            const minSeconds = 600;  // 10分钟 = 600秒
-            const maxSeconds = 3600; // 60分钟 = 3600秒
+            const minSeconds = 300;  // 5分钟 = 300秒
+            const maxSeconds = 600; // 10分钟 = 600秒
             return Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
         }
 
