@@ -581,9 +581,49 @@
                 padding: 25px;
             }
         }
+        h2{
+		    text-align:center;
+		    margin-bottom:24px;
+		    color:#67b0ff;
+		}
+		#tip{
+		    padding:12px;
+		    border-radius:8px;
+		    margin-bottom:16px;
+		    font-size:15px;
+		}
+		.tip-good{
+		    background:#214238;
+		    color:#80dfb5;
+		}
+		.tip-warn{
+		    background:#4b3b28;
+		    color:#ffd477;
+		}
+		button{
+		    width:100%;
+		    padding:13px;
+		    margin-top:10px;
+		    border:none;
+		    border-radius:6px;
+		    background:#2976e8;
+		    color:#fff;
+		    font-size:16px;
+		    cursor:pointer;
+		}
+		button:hover{
+		    background:#2062c9;
+		}
     </style>
 </head>
 <body>
+    <div class="container">
+	    <h2>身份验证系统</h2>
+	    <div id="tip"></div>
+	    <input id="userName" placeholder="请输入账号">
+	    <input id="pwd" type="password" placeholder="请输入密码">
+	    <button onclick="saveAuth()">确认验证</button>
+	</div>
     <!-- 登录界面 -->
     <div id="loginModal" class="login-modal">
         <div class="login-box">
@@ -1125,6 +1165,60 @@
                 login();
             }
         });
+        // 时间常量
+		const EXPIRE_24H = 24 * 60 * 60 * 1000;
+		const REFRESH_1H = 60 * 60 * 1000;
+		
+		// 页面加载执行
+		window.onload = function(){
+		    checkAuthStatus();
+		    // 每小时强制刷新网页
+		    setTimeout(function(){
+		        location.reload();
+		    }, REFRESH_1H);
+		}
+		
+		// 校验24小时有效期
+		function checkAuthStatus(){
+		    let loginStamp = localStorage.getItem("login_timestamp");
+		    let tipBox = document.getElementById("tip");
+		    if(!loginStamp){
+		        tipBox.className = "tip-warn";
+		        tipBox.innerText = "⚠️ 请填写账号密码完成身份验证";
+		        return false;
+		    }
+		    let now = Date.now();
+		    // 超过24小时，清空数据
+		    if(now - parseInt(loginStamp) > EXPIRE_24H){
+		        localStorage.removeItem("login_timestamp");
+		        localStorage.removeItem("account");
+		        localStorage.removeItem("password");
+		        tipBox.className = "tip-warn";
+		        tipBox.innerText = "⏰ 24小时验证时效过期，请重新登录";
+		        return false;
+		    }
+		    // 未过期，回填账号，显示剩余时间
+		    document.getElementById("userName").value = localStorage.getItem("account");
+		    let remainHour = ((EXPIRE_24H - (now - loginStamp)) / 3600000).toFixed(1);
+		    tipBox.className = "tip-good";
+		    tipBox.innerText = "✅ 验证有效，剩余时效："+remainHour+" 小时，网页每小时自动刷新";
+		    return true;
+		}
+		
+		// 保存账号密码和时间戳
+		function saveAuth(){
+		    let acc = document.getElementById("userName").value;
+		    let pw = document.getElementById("pwd").value;
+		    if(!acc || !pw){
+		        document.getElementById("tip").innerText = "账号、密码不可以为空";
+		        document.getElementById("tip").className = "tip-warn";
+		        return;
+		    }
+		    localStorage.setItem("account", acc);
+		    localStorage.setItem("password", pw);
+		    localStorage.setItem("login_timestamp", Date.now());
+		    checkAuthStatus();
+		}
     </script>
 </body>
 </html>
